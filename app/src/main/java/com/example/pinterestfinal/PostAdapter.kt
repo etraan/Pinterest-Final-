@@ -16,28 +16,23 @@ class PostAdapter(
 ) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     inner class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val ivPostImage: ImageView   = itemView.findViewById(R.id.ivPostImage)
-        val tvPostTitle: TextView    = itemView.findViewById(R.id.tvPostTitle)
-        val tvPostAuthor: TextView   = itemView.findViewById(R.id.tvPostAuthor)
-        val ibLike: ImageButton      = itemView.findViewById(R.id.ibLike)
+        val ivPostImage: ImageView = itemView.findViewById(R.id.ivPostImage)
+        val tvPostTitle: TextView  = itemView.findViewById(R.id.tvPostTitle)
+        val tvPostAuthor: TextView = itemView.findViewById(R.id.tvPostAuthor)
+        val ibLike: ImageButton    = itemView.findViewById(R.id.ibLike)
 
         fun bind(post: Post, position: Int) {
             tvPostTitle.text  = post.title
             tvPostAuthor.text = post.author
 
-            // Resolve drawable by name, fall back to placeholder
-            val resId = itemView.context.resources.getIdentifier(
-                post.imageResName, "drawable", itemView.context.packageName
-            )
-            ivPostImage.setImageResource(if (resId != 0) resId else R.drawable.post_placeholder)
+            ImageUtils.loadImage(ivPostImage, post.imageResName)
 
-            // Heart icon: filled if liked
             ibLike.setImageResource(
                 if (post.isLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline
             )
 
             itemView.setOnClickListener { onItemClicked(post) }
-            ibLike.setOnClickListener { onLikeClicked(post, position) }
+            ibLike.setOnClickListener   { onLikeClicked(post, position) }
         }
     }
 

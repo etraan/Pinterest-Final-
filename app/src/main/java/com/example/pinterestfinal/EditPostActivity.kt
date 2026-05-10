@@ -1,13 +1,18 @@
 // Team Members: Ellie Traan, Kymmani Allen, Jazmyne Graham
 package com.example.pinterestfinal
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
@@ -23,9 +28,23 @@ class EditPostActivity : AppCompatActivity() {
     private lateinit var ivEditPreview: ImageView
     private lateinit var etEditTitle: EditText
     private lateinit var etEditDescription: EditText
-    private lateinit var etEditImageRes: EditText
+    private lateinit var btnPickImage: Button
     private lateinit var btnUpdatePost: Button
     private lateinit var tvEditStatus: TextView
+
+    // Tracks if user picked a new image; empty means keep existing
+    private var selectedImageUri: String = ""
+
+    private val pickImageLauncher =
+        registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
+            if (uri != null) {
+                contentResolver.takePersistableUriPermission(
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+                selectedImageUri = uri.toString()
+                ivEditPreview.setImageURI(uri)
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +56,8 @@ class EditPostActivity : AppCompatActivity() {
             insets
         }
 
+        val toolbar: Toolbar = findViewById(R.id.toolbarEditPost)
+        setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = getString(R.string.title_edit_post)
 
@@ -49,14 +70,20 @@ class EditPostActivity : AppCompatActivity() {
         if (found == null) { finish(); return }
         currentPost = found
 
-        ivEditPreview    = findViewById(R.id.ivEditPreview)
-        etEditTitle      = findViewById(R.id.etEditTitle)
+        ivEditPreview     = findViewById(R.id.ivEditPreview)
+        etEditTitle       = findViewById(R.id.etEditTitle)
         etEditDescription = findViewById(R.id.etEditDescription)
-        etEditImageRes   = findViewById(R.id.etEditImageRes)
-        btnUpdatePost    = findViewById(R.id.btnUpdatePost)
-        tvEditStatus     = findViewById(R.id.tvEditStatus)
+        btnPickImage      = findViewById(R.id.btnPickImageEdit)
+        btnUpdatePost     = findViewById(R.id.btnUpdatePost)
+        tvEditStatus      = findViewById(R.id.tvEditStatus)
 
         populateFields()
+
+        btnPickImage.setOnClickListener {
+            pickImageLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        }
 
         btnUpdatePost.setOnClickListener { updatePost() }
     }
@@ -64,16 +91,13 @@ class EditPostActivity : AppCompatActivity() {
     private fun populateFields() {
         etEditTitle.setText(currentPost.title)
         etEditDescription.setText(currentPost.description)
-        etEditImageRes.setText(currentPost.imageResName)
-
-        val resId = resources.getIdentifier(currentPost.imageResName, "drawable", packageName)
-        ivEditPreview.setImageResource(if (resId != 0) resId else R.drawable.post_placeholder)
+        // Show existing image
+        ImageUtils.loadImage(ivEditPreview, currentPost.imageResName)
     }
 
     private fun updatePost() {
         val newTitle = etEditTitle.text.toString().trim()
         val newDesc  = etEditDescription.text.toString().trim()
-        val newImage = etEditImageRes.text.toString().trim().ifEmpty { "post_placeholder" }
 
         if (newTitle.isEmpty() || newDesc.isEmpty()) {
             tvEditStatus.text = getString(R.string.error_empty_fields)
@@ -82,7 +106,10 @@ class EditPostActivity : AppCompatActivity() {
 
         currentPost.title       = newTitle
         currentPost.description = newDesc
-        currentPost.imageResName = newImage
+        // Only update image if user picked a new one
+        if (selectedImageUri.isNotEmpty()) {
+            currentPost.imageResName = selectedImageUri
+        }
 
         val result = dbHandler.updatePost(currentPost)
         if (result) {

@@ -26,10 +26,7 @@ class UserPostAdapter(
             tvPostTitle.text = post.title
             tvPostDesc.text  = post.description
 
-            val resId = itemView.context.resources.getIdentifier(
-                post.imageResName, "drawable", itemView.context.packageName
-            )
-            ivPostImage.setImageResource(if (resId != 0) resId else R.drawable.post_placeholder)
+            ImageUtils.loadImage(ivPostImage, post.imageResName)
 
             btnEdit.setOnClickListener   { onEditClicked(post) }
             btnDelete.setOnClickListener { onDeleteClicked(post) }

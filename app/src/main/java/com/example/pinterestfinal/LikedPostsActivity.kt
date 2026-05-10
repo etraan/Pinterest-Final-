@@ -9,10 +9,11 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 
 class LikedPostsActivity : AppCompatActivity() {
 
@@ -36,6 +37,8 @@ class LikedPostsActivity : AppCompatActivity() {
             insets
         }
 
+        val toolbar: Toolbar = findViewById(R.id.toolbarLikedPosts)
+        setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = getString(R.string.title_liked_posts)
 
@@ -51,8 +54,7 @@ class LikedPostsActivity : AppCompatActivity() {
                 intent.putExtra(PostDetailActivity.EXTRA_POST_ID, post.id)
                 detailLauncher.launch(intent)
             },
-            onLikeClicked = { post, position ->
-                // Un-liking from this screen removes it from the list
+            onLikeClicked = { post, _ ->
                 dbHandler.setLiked(post.id, false)
                 Toast.makeText(this, getString(R.string.post_unliked), Toast.LENGTH_SHORT).show()
                 setResult(RESULT_OK)
@@ -60,7 +62,6 @@ class LikedPostsActivity : AppCompatActivity() {
             }
         )
         recyclerView.adapter = adapter
-
         refreshLikedPosts()
     }
 

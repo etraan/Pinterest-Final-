@@ -69,4 +69,6 @@
     <!-- Content descriptions -->
     <string name="post_image">Post image</string>
     <string name="label_author_prefix">by %1$s</string>
+    <string name="pick_image">Pick Image from Gallery</string>
+    <string name="change_image">Change Image</string>
 </resources>

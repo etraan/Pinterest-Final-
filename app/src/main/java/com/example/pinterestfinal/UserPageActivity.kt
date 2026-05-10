@@ -3,12 +3,14 @@ package com.example.pinterestfinal
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -37,11 +39,13 @@ class UserPageActivity : AppCompatActivity() {
             insets
         }
 
+        val toolbar: Toolbar = findViewById(R.id.toolbarUserPage)
+        setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = getString(R.string.title_user_page)
 
-        dbHandler  = PostDBHandler(this, null, null, 1)
-        tvNoPost   = findViewById(R.id.tvNoUserPosts)
+        dbHandler    = PostDBHandler(this, null, null, 1)
+        tvNoPost     = findViewById(R.id.tvNoUserPosts)
         recyclerView = findViewById(R.id.recyclerViewUserPosts)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -58,7 +62,6 @@ class UserPageActivity : AppCompatActivity() {
 
         refreshUserPosts()
 
-        // FAB: add a new post from user page too
         val fab: FloatingActionButton = findViewById(R.id.fabUserPage)
         fab.setOnClickListener {
             val intent = Intent(this, NewPostActivity::class.java)
@@ -87,7 +90,7 @@ class UserPageActivity : AppCompatActivity() {
     private fun refreshUserPosts() {
         val userPosts = dbHandler.getPostsByAuthor(getString(R.string.current_user)).toMutableList()
         adapter.updatePosts(userPosts)
-        tvNoPost.visibility = if (userPosts.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
+        tvNoPost.visibility = if (userPosts.isEmpty()) View.VISIBLE else View.GONE
     }
 
     override fun onSupportNavigateUp(): Boolean {

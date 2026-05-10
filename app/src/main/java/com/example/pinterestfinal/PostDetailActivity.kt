@@ -7,9 +7,9 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
@@ -40,7 +40,8 @@ class PostDetailActivity : AppCompatActivity() {
             insets
         }
 
-        // Back button support
+        val toolbar: Toolbar = findViewById(R.id.toolbarPostDetail)
+        setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = getString(R.string.title_post_detail)
 
@@ -53,29 +54,25 @@ class PostDetailActivity : AppCompatActivity() {
         if (found == null) { finish(); return }
         currentPost = found
 
-        // Wire views
-        ivDetailImage      = findViewById(R.id.ivDetailImage)
-        tvDetailTitle      = findViewById(R.id.tvDetailTitle)
+        ivDetailImage       = findViewById(R.id.ivDetailImage)
+        tvDetailTitle       = findViewById(R.id.tvDetailTitle)
         tvDetailDescription = findViewById(R.id.tvDetailDescription)
-        tvDetailAuthor     = findViewById(R.id.tvDetailAuthor)
-        ibDetailLike       = findViewById(R.id.ibDetailLike)
-        btnShare           = findViewById(R.id.btnShare)
-        tvLikeStatus       = findViewById(R.id.tvLikeStatus)
+        tvDetailAuthor      = findViewById(R.id.tvDetailAuthor)
+        ibDetailLike        = findViewById(R.id.ibDetailLike)
+        btnShare            = findViewById(R.id.btnShare)
+        tvLikeStatus        = findViewById(R.id.tvLikeStatus)
 
         populateViews()
 
         ibDetailLike.setOnClickListener { toggleLike() }
-        btnShare.setOnClickListener { sharePost() }
+        btnShare.setOnClickListener     { sharePost() }
     }
 
     private fun populateViews() {
         tvDetailTitle.text       = currentPost.title
         tvDetailDescription.text = currentPost.description
         tvDetailAuthor.text      = getString(R.string.label_author_prefix, currentPost.author)
-
-        val resId = resources.getIdentifier(currentPost.imageResName, "drawable", packageName)
-        ivDetailImage.setImageResource(if (resId != 0) resId else R.drawable.post_placeholder)
-
+        ImageUtils.loadImage(ivDetailImage, currentPost.imageResName)
         updateLikeUI()
     }
 
@@ -94,13 +91,9 @@ class PostDetailActivity : AppCompatActivity() {
         dbHandler.setLiked(currentPost.id, newLiked)
         currentPost.isLiked = newLiked
         updateLikeUI()
-
-        val msg = if (newLiked) getString(R.string.post_liked) else getString(R.string.post_unliked)
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
         setResult(RESULT_OK)
     }
 
-    // Implicit intent: share post title + description to another app (Messages, etc.)
     private fun sharePost() {
         val shareText = getString(
             R.string.share_text_format,

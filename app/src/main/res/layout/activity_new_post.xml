@@ -1,80 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".NewPostActivity">
 
-    <LinearLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarNewPost"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/hint_post_title"
-            android:textStyle="bold"
-            android:textSize="14sp" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-        <EditText
-            android:id="@+id/etNewPostTitle"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/hint_post_title"
-            android:inputType="textCapSentences"
-            android:layout_marginBottom="12dp" />
+            android:orientation="vertical"
+            android:padding="24dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/hint_post_description"
-            android:textStyle="bold"
-            android:textSize="14sp" />
+            <!-- Image preview -->
+            <ImageView
+                android:id="@+id/ivNewPostPreview"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop"
+                android:contentDescription="@string/post_image"
+                android:src="@drawable/post_placeholder"
+                android:layout_marginBottom="8dp" />
 
-        <EditText
-            android:id="@+id/etNewPostDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/hint_post_description"
-            android:inputType="textMultiLine|textCapSentences"
-            android:minLines="3"
-            android:gravity="top"
-            android:layout_marginBottom="12dp" />
+            <!-- Pick image button -->
+            <Button
+                android:id="@+id/btnPickImage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/pick_image"
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/hint_image_res"
-            android:textStyle="bold"
-            android:textSize="14sp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/hint_post_title"
+                android:textStyle="bold"
+                android:textSize="14sp" />
 
-        <EditText
-            android:id="@+id/etNewPostImageRes"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/hint_image_res_optional"
-            android:inputType="textNoSuggestions"
-            android:layout_marginBottom="20dp" />
+            <EditText
+                android:id="@+id/etNewPostTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_post_title"
+                android:inputType="textCapSentences"
+                android:layout_marginBottom="12dp" />
 
-        <Button
-            android:id="@+id/btnSavePost"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/save_post"
-            style="@style/Widget.MaterialComponents.Button" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/hint_post_description"
+                android:textStyle="bold"
+                android:textSize="14sp" />
 
-        <TextView
-            android:id="@+id/tvNewPostStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:textSize="14sp"
-            android:text="" />
+            <EditText
+                android:id="@+id/etNewPostDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_post_description"
+                android:inputType="textMultiLine|textCapSentences"
+                android:minLines="3"
+                android:gravity="top"
+                android:layout_marginBottom="20dp" />
 
-    </LinearLayout>
+            <Button
+                android:id="@+id/btnSavePost"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/save_post"
+                style="@style/Widget.MaterialComponents.Button" />
 
-</ScrollView>
+            <TextView
+                android:id="@+id/tvNewPostStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textSize="14sp"
+                android:text="" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>
