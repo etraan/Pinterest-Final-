@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.pinterestfinal">
-
+    <!-- Required for PostFetchService to download data from the Unsplash API -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -10,48 +10,45 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.PinterestFinal">
-
-        <!-- Home feed -->
+        android:theme="@style/Theme.PinterestFinal"
+        android:usesCleartextTraffic="false">
+        <activity
+            android:name=".WebViewActivity"
+            android:exported="false"
+            android:parentActivityName=".PostDetailActivity" />
+        <!-- Main activity: home feed -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Full post view -->
+        </activity> <!-- Full post detail view with like, share, and web view -->
         <activity
             android:name=".PostDetailActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity" />
-
-        <!-- User's own posts -->
+            android:parentActivityName=".MainActivity" /> <!-- User's own posts with edit and delete -->
         <activity
             android:name=".UserPageActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity" />
-
-        <!-- Liked posts collection -->
+            android:parentActivityName=".MainActivity" /> <!-- Collection of liked posts from SQLite -->
         <activity
             android:name=".LikedPostsActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity" />
-
-        <!-- Create new post -->
+            android:parentActivityName=".MainActivity" /> <!-- Form to create a new post -->
         <activity
             android:name=".NewPostActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity" />
-
-        <!-- Edit existing post -->
+            android:parentActivityName=".MainActivity" /> <!-- Form to edit an existing post -->
         <activity
             android:name=".EditPostActivity"
             android:exported="false"
-            android:parentActivityName=".UserPageActivity" />
-
+            android:parentActivityName=".UserPageActivity" /> <!-- Background service that fetches posts from the Unsplash API -->
+        <service
+            android:name=".PostFetchService"
+            android:exported="false" />
     </application>
 
 </manifest>

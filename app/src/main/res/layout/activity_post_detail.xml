@@ -8,6 +8,7 @@
     android:orientation="vertical"
     tools:context=".PostDetailActivity">
 
+    <!-- Toolbar with back arrow -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbarPostDetail"
         android:layout_width="match_parent"
@@ -25,6 +26,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- Full-width post image -->
             <ImageView
                 android:id="@+id/ivDetailImage"
                 android:layout_width="match_parent"
@@ -39,6 +41,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <!-- Post title -->
                 <TextView
                     android:id="@+id/tvDetailTitle"
                     android:layout_width="match_parent"
@@ -47,6 +50,7 @@
                     android:textStyle="bold"
                     tools:text="Golden Hour" />
 
+                <!-- Author -->
                 <TextView
                     android:id="@+id/tvDetailAuthor"
                     android:layout_width="wrap_content"
@@ -56,6 +60,7 @@
                     android:layout_marginTop="4dp"
                     tools:text="by PinBoard" />
 
+                <!-- Description -->
                 <TextView
                     android:id="@+id/tvDetailDescription"
                     android:layout_width="match_parent"
@@ -64,6 +69,7 @@
                     android:layout_marginTop="12dp"
                     tools:text="A beautiful sunset over the mountains." />
 
+                <!-- Like row: heart button + status label -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -90,6 +96,7 @@
 
                 </LinearLayout>
 
+                <!-- Share button: fires implicit ACTION_SEND intent -->
                 <Button
                     android:id="@+id/btnShare"
                     android:layout_width="match_parent"
@@ -97,6 +104,15 @@
                     android:layout_marginTop="12dp"
                     android:text="@string/share_post"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+                <!-- View on Web button: launches WebViewActivity -->
+                <Button
+                    android:id="@+id/btnViewOnWeb"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/view_on_web"
+                    style="@style/Widget.MaterialComponents.Button" />
 
             </LinearLayout>
 

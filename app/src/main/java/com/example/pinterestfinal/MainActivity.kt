@@ -1,7 +1,10 @@
 // Team Members: Ellie Traan, Kymmani Allen, Jazmyne Graham
 package com.example.pinterestfinal
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -13,6 +16,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -29,7 +33,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var adapter: PostAdapter
     private lateinit var drawerLayout: DrawerLayout
 
-    // Refresh when returning from any sub-activity
+    /**
+     * BroadcastReceiver that listens for the ACTION_POSTS_FETCHED broadcast
+     * sent by PostFetchService when it finishes downloading posts from the API.
+     * On receipt, refreshes the RecyclerView feed with the new data.
+     */
+    private val postsFetchedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == PostFetchService.ACTION_POSTS_FETCHED) {
+                // New posts arrived from the service — refresh the feed
+                refreshFeed()
+                Toast.makeText(
+                    this@MainActivity,
+                    getString(R.string.feed_refreshed),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    // ActivityResultLauncher — refreshes feed when any sub-activity returns
     private val activityLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             refreshFeed()
@@ -45,11 +68,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             insets
         }
 
-        // Toolbar
+        // Set up toolbar
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        // Navigation Drawer
+        // Set up Navigation Drawer
         drawerLayout = findViewById(R.id.drawerLayout)
         val navView: NavigationView = findViewById(R.id.navView)
         val toggle = ActionBarDrawerToggle(
@@ -60,7 +83,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
         navView.setNavigationItemSelectedListener(this)
 
-        // Modern back press handling: close drawer first if open
+        // Modern back press: close drawer first if open, then exit normally
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
@@ -72,46 +95,78 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         })
 
-        // Welcome message
+        // Display welcome message from strings.xml
         val tvWelcome: TextView = findViewById(R.id.tvWelcome)
         tvWelcome.text = getString(R.string.welcome_message)
 
-        // Database — seed only on first run
+        // Initialize DB handler — seed preset posts only if DB is empty
         dbHandler = PostDBHandler(this, null, null, 1)
         if (dbHandler.getAllPosts().isEmpty()) {
             seedDatabase()
         }
 
-        // RecyclerView with staggered grid (Pinterest style: 2 columns)
+        // Set up RecyclerView with 2-column staggered grid (Pinterest style)
         recyclerView = findViewById(R.id.recyclerViewFeed)
-        recyclerView.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        recyclerView.layoutManager =
+            StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
 
         adapter = PostAdapter(
             posts = dbHandler.getAllPosts().toMutableList(),
             onItemClicked = { post ->
+                // Pass post id to PostDetailActivity via explicit intent
                 val intent = Intent(this, PostDetailActivity::class.java)
                 intent.putExtra(PostDetailActivity.EXTRA_POST_ID, post.id)
                 activityLauncher.launch(intent)
             },
             onLikeClicked = { post, position ->
+                // Toggle like in DB and update the card's heart icon immediately
                 val newLiked = !post.isLiked
                 dbHandler.setLiked(post.id, newLiked)
                 adapter.updateLikeAt(position, newLiked)
-                val msg = if (newLiked) getString(R.string.post_liked) else getString(R.string.post_unliked)
+                val msg = if (newLiked) getString(R.string.post_liked)
+                else getString(R.string.post_unliked)
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             }
         )
         recyclerView.adapter = adapter
 
-        // FAB: New Post
+        // FAB: opens NewPostActivity to create a new post
         val fab: FloatingActionButton = findViewById(R.id.fab)
         fab.setOnClickListener {
             val intent = Intent(this, NewPostActivity::class.java)
             activityLauncher.launch(intent)
         }
+
+        // Start the background Service to fetch new posts from Unsplash API.
+        // The service runs on a background thread and broadcasts back when done.
+        startFetchService()
     }
 
-    // Toolbar menu (extra: could add search or filter later)
+    /**
+     * Register the BroadcastReceiver when the activity becomes visible.
+     * This ensures we only receive broadcasts while the app is in the foreground.
+     */
+    override fun onResume() {
+        super.onResume()
+        val filter = IntentFilter(PostFetchService.ACTION_POSTS_FETCHED)
+        ContextCompat.registerReceiver(
+            this,
+            postsFetchedReceiver,
+            filter,
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+    }
+
+    /**
+     * Unregister the BroadcastReceiver when the activity goes to the background
+     * to avoid memory leaks.
+     */
+    override fun onPause() {
+        super.onPause()
+        unregisterReceiver(postsFetchedReceiver)
+    }
+
+    // Inflate the toolbar menu
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
@@ -128,39 +183,53 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    // Navigation Drawer item selection
+    // Handle navigation drawer item clicks
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.nav_home -> { /* already here */ }
+            R.id.nav_home      -> { /* already on home */ }
             R.id.nav_user_page -> {
-                val intent = Intent(this, UserPageActivity::class.java)
-                activityLauncher.launch(intent)
+                activityLauncher.launch(Intent(this, UserPageActivity::class.java))
             }
             R.id.nav_liked_posts -> {
-                val intent = Intent(this, LikedPostsActivity::class.java)
-                activityLauncher.launch(intent)
+                activityLauncher.launch(Intent(this, LikedPostsActivity::class.java))
             }
         }
         drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
 
+    /**
+     * Starts PostFetchService as a background service.
+     * The service fetches posts from the Unsplash API, saves them to SQLite,
+     * and broadcasts ACTION_POSTS_FETCHED when done so we can refresh the feed.
+     */
+    private fun startFetchService() {
+        val serviceIntent = Intent(this, PostFetchService::class.java)
+        startService(serviceIntent)
+    }
+
+    /** Reload the post list from the database and update the RecyclerView. */
     private fun refreshFeed() {
         adapter.updatePosts(dbHandler.getAllPosts().toMutableList())
     }
 
+    /**
+     * Seeds the database with 10 preset local posts on first launch.
+     * These use drawable resource names stored in res/drawable/.
+     */
     private fun seedDatabase() {
         val presetPosts = listOf(
-            Post("Golden Hour", "A beautiful sunset over the mountains.", "post_sunset", "PinBoard"),
-            Post("City Lights", "The city skyline at night.", "post_city", "PinBoard"),
-            Post("Fresh Blooms", "A colorful bouquet of spring flowers.", "post_flowers", "PinBoard"),
-            Post("Mountain Trail", "Hiking through misty peaks.", "post_mountain", "PinBoard"),
-            Post("Ocean Waves", "Peaceful waves crashing on the shore.", "post_ocean", "PinBoard"),
-            Post("Cozy Corner", "A perfect reading nook with warm lighting.", "post_cozy", "PinBoard"),
-            Post("Street Art", "Vibrant murals in the heart of the city.", "post_art", "PinBoard"),
-            Post("Forest Walk", "Tall trees and dappled sunlight.", "post_forest", "PinBoard"),
-            Post("Desert Dunes", "Endless golden sand dunes.", "post_desert", "PinBoard"),
-            Post("Rainy Day", "Raindrops on a window pane.", "post_rain", "PinBoard")
+            Post("Golden Hour", "A beautiful sunset!", "post_sunset", "PinBoard"),
+            Post("Chicago", "A view of the Chicago river.", "post_city", "PinBoard"),
+            Post("Professor Tarimo", "A CS professor at Connecticut College!", "post_tarimo", "PinBoard"),
+            Post("Mountains", "Some cool looking mountains.", "post_mountain", "PinBoard"),
+            Post("Ocean", "A picture of the Connecticut shore.", "post_ocean", "PinBoard"),
+            Post("Cozy Corner", "A cool stock image of someone being cozy.", "post_cozy", "PinBoard"),
+            Post("Starry Night", "One of Picasso's most famous paintings!", "post_art", "PinBoard"),
+            Post("Conn Coll Arbo", "Picture of the arboretum in the fall.", "post_forest", "PinBoard"),
+            Post("Desert Dunes", "A camel in a desert. #rollhumps", "post_desert", "PinBoard"),
+            Post("Rainy Day", "Another cool stock image of some rain on an umbrella.", "post_rain", "PinBoard"),
+            Post("Fresh Blooms", "Some pretty spring flowers.", "post_flowers", "PinBoard"),
         )
         presetPosts.forEach { dbHandler.addPost(it) }
     }
