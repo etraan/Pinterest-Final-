@@ -1,3 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PinterestFinal</string>
+    <string name="app_name">PinBoard</string>
+
+    <!-- Navigation -->
+    <string name="nav_open">Open navigation drawer</string>
+    <string name="nav_close">Close navigation drawer</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_my_posts">My Posts</string>
+    <string name="nav_liked_posts">Liked Posts</string>
+    <string name="nav_subtitle">Your personal inspiration feed</string>
+
+    <!-- Activity titles -->
+    <string name="title_post_detail">Post</string>
+    <string name="title_user_page">My Posts</string>
+    <string name="title_liked_posts">Liked Posts</string>
+    <string name="title_new_post">New Post</string>
+    <string name="title_edit_post">Edit Post</string>
+
+    <!-- Home screen -->
+    <string name="welcome_message">Welcome to PinBoard ✨</string>
+
+    <!-- Section labels -->
+    <string name="your_posts_label">Your Posts</string>
+    <string name="liked_posts_label">Posts You\'ve Liked</string>
+
+    <!-- Current logged-in user (replace with real auth if added later) -->
+    <string name="current_user">Me</string>
+
+    <!-- Hints / field labels -->
+    <string name="hint_post_title">Title</string>
+    <string name="hint_post_description">Description</string>
+    <string name="hint_image_res">Image resource name</string>
+    <string name="hint_image_res_optional">Image resource name (optional)</string>
+
+    <!-- Buttons -->
+    <string name="new_post">New Post</string>
+    <string name="save_post">Save Post</string>
+    <string name="update_post">Update Post</string>
+    <string name="share_post">Share This Post</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Like UI -->
+    <string name="like_button">Like</string>
+    <string name="liked">❤ Liked</string>
+    <string name="not_liked">♡ Like this post</string>
+
+    <!-- Status / feedback messages -->
+    <string name="post_liked">Added to Liked Posts!</string>
+    <string name="post_unliked">Removed from Liked Posts</string>
+    <string name="post_saved">Post saved!</string>
+    <string name="post_updated">Post updated!</string>
+    <string name="post_deleted">Post deleted</string>
+    <string name="no_match_found">No Match Found</string>
+    <string name="error_empty_fields">Title and Description cannot be empty</string>
+    <string name="no_user_posts">You haven\'t created any posts yet.\nTap + to add one!</string>
+    <string name="no_liked_posts">No liked posts yet.\nHeart a post to save it here!</string>
+
+    <!-- Share intent -->
+    <string name="share_via">Share via…</string>
+    <string name="share_text_format">%1$s\n\n%2$s\n\nShared from PinBoard</string>
+
+    <!-- Confirm delete dialog -->
+    <string name="confirm_delete_title">Delete Post</string>
+    <string name="confirm_delete_message">Are you sure you want to delete \"%1$s\"?</string>
+
+    <!-- Content descriptions -->
+    <string name="post_image">Post image</string>
+    <string name="label_author_prefix">by %1$s</string>
 </resources>
